@@ -19,6 +19,6 @@ func Execute() {
 
 // Not the best pratice for handle error but we simplify to learn new material
 func handleErr(err error) {
-	_,_ = fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+	_, _ = fmt.Fprint(os.Stderr, err)
+	os.Exit(1)
 }

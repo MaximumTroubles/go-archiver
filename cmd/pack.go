@@ -3,7 +3,7 @@ package cmd
 import "github.com/spf13/cobra"
 
 var packCmd = &cobra.Command{
-	Use: "pack",
+	Use:   "pack",
 	Short: "Compres file command",
 }
 

@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/MaximumTroubles/go-archiver/lib/vlc"
 	"github.com/spf13/cobra"
 )
 
-var vlcCmd = &cobra.Command{
+var vlcPackCmd = &cobra.Command{
 	Use:   "vlc",
 	Short: "Compres file using variable-length code",
 	Run:   pack,
@@ -35,6 +35,9 @@ func pack(_ *cobra.Command, args []string) {
 		handleErr(err)
 	}
 
+	// Close file always
+	defer r.Close()
+
 	// Here we read all data from file.
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -42,9 +45,7 @@ func pack(_ *cobra.Command, args []string) {
 	}
 
 	// Here we provide data to file compresor
-	// packed := Encode(data)
-	packed := ""
-	fmt.Println(string(data))
+	packed := vlc.Encode(string(data))
 
 	// Here we write down compresed data to new file with perm: 0644 which means that current user can read and write other only read
 	err = os.WriteFile(packedFileName(filePath), []byte(packed), 0644)
@@ -68,5 +69,5 @@ func packedFileName(path string) string {
 }
 
 func init() {
-	packCmd.AddCommand(vlcCmd)
+	packCmd.AddCommand(vlcPackCmd)
 }
