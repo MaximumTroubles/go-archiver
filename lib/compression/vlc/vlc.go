@@ -5,7 +5,14 @@ import (
 	"unicode"
 )
 
-func Encode(str string) []byte {
+type EncoderDecoder struct {
+}
+
+func NewVlc() EncoderDecoder {
+	return EncoderDecoder{}
+}
+
+func (vlc EncoderDecoder) Encode(str string) []byte {
 	// algorithm
 
 	// prepare text: M -> !m
@@ -21,8 +28,8 @@ func Encode(str string) []byte {
 	return chunks.Bytes()
 }
 
-func Decode(encodedData []byte) string {
-	// after refacor, we get slice of bytes here, 
+func (vlc EncoderDecoder) Decode(encodedData []byte) string {
+	// after refacor, we get slice of bytes here,
 	bString := NewBinChunks(encodedData).Join()
 
 	// build decoding tree
