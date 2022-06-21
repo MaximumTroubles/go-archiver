@@ -42,7 +42,7 @@ func unpack(_ *cobra.Command, args []string) {
 	}
 
 	// Here we provide data to file compresor
-	packed := vlc.Decode(string(data))
+	packed := vlc.Decode(data)
 
 	// Here we write down compresed data to new file with perm: 0644 which means that current user can read and write other only read
 	err = os.WriteFile(unpackedFileName(filePath), []byte(packed), 0644)

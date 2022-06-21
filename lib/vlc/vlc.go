@@ -5,7 +5,7 @@ import (
 	"unicode"
 )
 
-func Encode(str string) string {
+func Encode(str string) []byte {
 	// algorithm
 
 	// prepare text: M -> !m
@@ -18,23 +18,17 @@ func Encode(str string) string {
 	chunks := splitByChunks(bStr, chunkSize)
 
 	// bytes to hex -> '20 30 3C'
-	return chunks.ToHex().hexToString()
+	return chunks.Bytes()
 }
 
-func Decode(encodedText string) string {
-	// hex chunks -> splited by " " and putted in HexChunks slice
-	hChunks := NewHexChunks(string(encodedText))
-
-	// Hex chunks convert to binary chunks // "100110", "1011001" ect.
-	bChunks := hChunks.ToBinary()
-
-	// bChunks -> join in one string "11010101001011010010101"
-	bStr := bChunks.Join()
+func Decode(encodedData []byte) string {
+	// after refacor, we get slice of bytes here, 
+	bString := NewBinChunks(encodedData).Join()
 
 	// build decoding tree
 	dTree := getEncodingTable().DecodingTree()
 
-	return exportText(dTree.Decode(bStr)) // My name is Ted -> !my name is !ted
+	return exportText(dTree.Decode(bString)) // My name is Ted -> !my name is !ted
 }
 
 // prepareText prepares text to be fit for encode:

@@ -17,7 +17,7 @@ var vlcPackCmd = &cobra.Command{
 	Run:   pack,
 }
 
-var ErrEmptyPath = errors.New("path to file is not specified\n")
+var ErrEmptyPath = errors.New("path to file is not specified")
 
 const packedExtension = "vlc"
 
@@ -48,7 +48,7 @@ func pack(_ *cobra.Command, args []string) {
 	packed := vlc.Encode(string(data))
 
 	// Here we write down compresed data to new file with perm: 0644 which means that current user can read and write other only read
-	err = os.WriteFile(packedFileName(filePath), []byte(packed), 0644)
+	err = os.WriteFile(packedFileName(filePath), packed, 0644)
 	if err != nil {
 		handleErr(err)
 	}

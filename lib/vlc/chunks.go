@@ -7,46 +7,49 @@ import (
 	"unicode/utf8"
 )
 
-type BinaryChuncks []BinaryChunck
+type BinaryChunks []BinaryChunk
 
-type BinaryChunck string
-
-type HexChunks []HexChunk
-
-type HexChunk string
+type BinaryChunk string
 
 type encodingTable map[rune]string
 
 const chunkSize = 8
 
-const hexChunkSeparator = " "
+func NewBinChunks(data []byte) BinaryChunks {
+	res := make(BinaryChunks, 0, len(data))
 
-func NewHexChunks(str string) HexChunks {
-	parts := strings.Split(str, hexChunkSeparator)
-
-	res := make(HexChunks, 0, len(parts))
-
-	for _, part := range parts {
-		res = append(res, HexChunk(part))
+	for _, code := range data {
+		res = append(res, NewBinChunk(code))
 	}
 
 	return res
 }
 
-func (bcs BinaryChuncks) ToHex() HexChunks {
-	res := make(HexChunks, 0, len(bcs))
+func NewBinChunk(data byte) BinaryChunk {
+	return BinaryChunk(fmt.Sprintf("%08b", data))
+}
 
-	for _, chunk := range bcs {
-		//Here we use method ToHex on 1 byte string = "00100100" and convert it into Hexadecimal notation
-		res = append(res, chunk.ToHex())
+func (bcs BinaryChunks) Bytes() []byte {
+	res := make([]byte, 0, len(bcs))
+
+	for _, bc := range bcs {
+		res = append(res, bc.Byte())
 	}
 
 	return res
 }
 
+func (bc BinaryChunk) Byte() byte {
+	num, err := strconv.ParseUint(string(bc), 2, chunkSize)
+	if err != nil {
+		panic("can't parse byte chunk" + err.Error())
+	}
 
-// Join joins chucks into one line and return as string 
-func (bcs BinaryChuncks) Join() string {
+	return byte(num)
+}
+
+// Join joins chucks into one line and return as string
+func (bcs BinaryChunks) Join() string {
 	var buf strings.Builder
 
 	for _, bc := range bcs {
@@ -55,47 +58,8 @@ func (bcs BinaryChuncks) Join() string {
 
 	return buf.String()
 }
- 
-func (bc BinaryChunck) ToHex() HexChunk {
-	num, err := strconv.ParseUint(string(bc), 2, chunkSize) // 2f 3a 9c
-	if err != nil {
-		panic("can't parse binary chunk: " + err.Error())
-	}
 
-	// here we have to make chunk ToUpper Case
-	res := strings.ToUpper(fmt.Sprintf("%x", num)) // 2F 3A 9C
-
-	// occassionaly convertation can return single result i.g:  "1 2F 3 9C", so we could prefix 0 to hex chunk
-	// ex. "1 2F 3 9C" => "01 2F 03 9C"
-	if len(res) == 1 {
-		res = "0" + res
-	}
-
-	return HexChunk(res)
-}
-
-func (hcs HexChunks) hexToString() string {
-
-	switch len(hcs) {
-	case 0:
-		return ""
-	case 1:
-		return string(hcs[0])
-	}
-
-	var buf strings.Builder
-
-	buf.WriteString(string(hcs[0]))
-
-	for _, hc := range hcs[1:] {
-		buf.WriteString(hexChunkSeparator)
-		buf.WriteString(string(hc))
-	}
-
-	return buf.String()
-}
-
-func splitByChunks(bStr string, chunkSize int) BinaryChuncks {
+func splitByChunks(bStr string, chunkSize int) BinaryChunks {
 	strLen := utf8.RuneCountInString(bStr)
 
 	chunksCount := strLen / chunkSize // 57 / 8 ==> go round it to interger = 7
@@ -105,7 +69,7 @@ func splitByChunks(bStr string, chunkSize int) BinaryChuncks {
 		chunksCount++
 	}
 
-	res := make(BinaryChuncks, 0, chunksCount)
+	res := make(BinaryChunks, 0, chunksCount)
 
 	var buf strings.Builder
 
@@ -113,7 +77,7 @@ func splitByChunks(bStr string, chunkSize int) BinaryChuncks {
 		buf.WriteString(string(ch))
 
 		if (i+1)%chunkSize == 0 {
-			res = append(res, BinaryChunck(buf.String()))
+			res = append(res, BinaryChunk(buf.String()))
 			buf.Reset()
 		}
 	}
@@ -123,29 +87,8 @@ func splitByChunks(bStr string, chunkSize int) BinaryChuncks {
 
 		lastChunk += strings.Repeat("0", chunkSize-len(lastChunk))
 
-		res = append(res, BinaryChunck(lastChunk))
+		res = append(res, BinaryChunk(lastChunk))
 	}
 
 	return res
-}
-
-func (hcs HexChunks) ToBinary() BinaryChuncks {
-	res := make(BinaryChuncks, 0, len(hcs))
-
-	for _, chunk := range hcs {
-		res = append(res, chunk.ToBinary())
-	}
-
-	return res
-}
-
-func (hc HexChunk) ToBinary() BinaryChunck {
-	num, err := strconv.ParseUint(string(hc), 16, chunkSize)
-	if err != nil {
-		panic("can't parse hex chunk" + err.Error())
-	}
-
-	res := fmt.Sprintf("%08b", num)
-
-	return BinaryChunck(res)
 }
